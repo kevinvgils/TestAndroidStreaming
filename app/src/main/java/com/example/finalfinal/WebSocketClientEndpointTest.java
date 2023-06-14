@@ -71,6 +71,7 @@ package com.example.finalfinal;//package com.example.finalfinal;
 //        public void handleMessage(String message);
 //    }
 //}
+import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 
@@ -79,6 +80,7 @@ import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
+import javax.websocket.RemoteEndpoint;
 import javax.websocket.Session;
 
 import org.glassfish.tyrus.client.ClientManager;
@@ -87,6 +89,7 @@ import org.glassfish.tyrus.client.ClientManager;
 public class WebSocketClientEndpointTest {
 
     Session userSession = null;
+    RemoteEndpoint.Async remoteEndpoint = null;
     private MessageHandler messageHandler;
 
     public WebSocketClientEndpointTest(URI endpointURI) {
@@ -103,12 +106,18 @@ public class WebSocketClientEndpointTest {
         System.out.println("opening websocket");
         this.userSession = userSession;
         System.out.println(this.userSession);
+        this.remoteEndpoint = userSession.getAsyncRemote();
     }
 
     @OnClose
     public void onClose(Session userSession, CloseReason reason) {
         System.out.println("closing websocket");
         this.userSession = null;
+        try {
+            userSession.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @OnMessage
@@ -128,7 +137,9 @@ public class WebSocketClientEndpointTest {
     }
 
     public void sendMessage(String message) {
-        this.userSession.getAsyncRemote().sendText(message);
+        System.out.println(message);
+        this.remoteEndpoint.sendText(message);
+        System.out.println(this.userSession);
     }
 
     public void sendFrame(byte[] frame) {

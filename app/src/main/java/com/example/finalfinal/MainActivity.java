@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -169,7 +170,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendFrameToUnencryptedServer(byte[] frameData) {
         if (clientEndPoint != null) {
-            clientEndPoint.sendMessage("{'streamId': 'test'," + Arrays.toString(frameData));
+            String s = Base64.getEncoder().encodeToString(frameData);
+            clientEndPoint.sendMessage("{\"streamId\": \"test\", \"frameData\": \"" + s + "\"}");
         } else {
             System.out.println("No UnencryptedServer");
             // Unencrypted WebSocket connection is not established
