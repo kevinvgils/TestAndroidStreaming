@@ -82,15 +82,10 @@ public class MainActivity extends AppCompatActivity {
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build();
 
-        encryptedImageAnalysis = new ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build();
-
         unencryptedImageAnalysis.setAnalyzer(cameraExecutor, unencryptedImageAnalyzer);
-        encryptedImageAnalysis.setAnalyzer(cameraExecutor, encryptedImageAnalyzer);
 
         try {
-            Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, unencryptedImageAnalysis, encryptedImageAnalysis);
+            Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, unencryptedImageAnalysis);
             CameraControl cameraControl = camera.getCameraControl();
             // Additional camera control operations can be performed here if needed.
         } catch (Exception e) {
@@ -105,7 +100,10 @@ public class MainActivity extends AppCompatActivity {
             // Convert the ImageProxy to byte array
             ByteBuffer buffer = image.getPlanes()[0].getBuffer();
             byte[] data = new byte[buffer.remaining()];
+
             buffer.get(data);
+
+            sendFrameToEncryptedServer(data);
 
             // Send the unencrypted frame to the server
             sendFrameToUnencryptedServer(data);
@@ -180,8 +178,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendFrameToEncryptedServer(byte[] frameData) {
+        //TODO: ENCRYPT FRAME DATA
+
         if (clientEndPoint != null) {
-            clientEndPoint.sendFrame(frameData);
+            String s = Base64.getEncoder().encodeToString(frameData);
+            clientEndPoint.sendMessage("{\"streamId\": \"testEncrypt\", \"frameData\": \"" + s + "\"}");
         } else {
             // Encrypted WebSocket connection is not established
             // Handle the case accordingly
