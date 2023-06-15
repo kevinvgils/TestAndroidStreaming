@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
                 encoder = new H264Encoder();
                 encoder.startEncoder(100, 100, 30);
                 cam = new CameraService(findViewById(R.id.previewView), context);
-                cam.startStream();
+                cam.startCamera();
                 sender = new RtmpSender(cam);
                 sender.startMuxerConnection();
             }

@@ -40,7 +40,7 @@ public class CameraService {
 
     public void startCamera(){
         initCamera();
-        bindCamera(cameraProviderFuture);
+        startProcessCamera();
     }
 
     private void initCamera(){
@@ -55,6 +55,20 @@ public class CameraService {
 
         // Create an executor service for camera operations
         cameraExecutor = Executors.newSingleThreadExecutor();
+    }
+
+    private void startProcessCamera(){
+        cameraProviderFuture.addListener(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                    bindCamera(cameraProvider);
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, ContextCompat.getMainExecutor(context));
     }
 
     private void bindCamera(ProcessCameraProvider cameraProvider) {

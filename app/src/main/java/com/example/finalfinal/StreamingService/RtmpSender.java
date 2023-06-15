@@ -74,7 +74,6 @@ public class RtmpSender implements RtmpConnectionListener {
     public void onReadyToPublish()
     {
         // Muxer is connected to the server and ready to receive data
-        cam.startStream();
         encoder.encodeFrame(cam.getCurrentFrame());
 
 
