@@ -36,6 +36,7 @@ public class CameraService {
 
     public CameraService(PreviewView view, Context context){
         previewView = view;
+        this.context = context;
     }
 
     public void startCamera(){
