@@ -77,57 +77,58 @@ public class RtmpSender implements RtmpConnectionListener {
     {
         Log.d(TAG, "=====Starting to publish=====");
         // Muxer is connected to the server and ready to receive data
+        encoder.setH264EncodedDataListener(new H264EncodedDataListener() {
+            @Override
+            public void onH264EncodedData(byte[] data, boolean isHeader, boolean isKeyFrame, long timeStamp) {
+                // Process the encoded H.264 data here
+                // You can send it over the network, save to a file, or handle it as needed
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        try {
+                            muxer.postVideo(new H264VideoFrame() {
+                                @Override
+                                public boolean isHeader() {
+                                    return isHeader;
+                                }
 
+                                @Override
+                                public long getTimestamp() {
+                                    return timeStamp;
+                                }
+
+                                @NonNull
+                                @Override
+                                public byte[] getData() {
+                                    return data;
+                                }
+
+                                @Override
+                                public boolean isKeyframe() {
+                                    return isKeyFrame;
+                                }
+                            });
+                        } catch (IOException e) {
+                            // An error occured while sending the video frame to the server
+                            Log.e("ERROR", e.getMessage());
+                        }
+
+                        return null;
+                    }
+                }.execute();
+            }
+        });
 
         int i = 0;
         while(true) {
             i++;
 
             try{
-                encoder.encodeFrame(cam.getFrame());
+                if(cam.getFrame() != null){
+                    encoder.encodeFrame(cam.getFrame());
+                } else{
 
-                encoder.setH264EncodedDataListener(new H264EncodedDataListener() {
-                    @Override
-                    public void onH264EncodedData(byte[] data, boolean isHeader, boolean isKeyFrame, long timeStamp) {
-                        // Process the encoded H.264 data here
-                        // You can send it over the network, save to a file, or handle it as needed
-                        Log.i("TEST", "onH264EncodedData: RUN!");
-                        new AsyncTask<Void, Void, Void>() {
-                            @Override
-                            protected Void doInBackground(Void... params) {
-                                try {
-                                    muxer.postVideo(new H264VideoFrame() {
-                                        @Override
-                                        public boolean isHeader() {
-                                            return isHeader;
-                                        }
-
-                                        @Override
-                                        public long getTimestamp() {
-                                            return timeStamp;
-                                        }
-
-                                        @NonNull
-                                        @Override
-                                        public byte[] getData() {
-                                            return data;
-                                        }
-
-                                        @Override
-                                        public boolean isKeyframe() {
-                                            return isKeyFrame;
-                                        }
-                                    });
-                                } catch (IOException e) {
-                                    // An error occured while sending the video frame to the server
-                                    Log.e("ERROR", e.getMessage());
-                                }
-
-                                return null;
-                            }
-                        }.execute();
-                    }
-                });
+                }
             } catch (Exception e){
                 Log.e(TAG, "onReadyToPublish: Empty frame on iteration: "+i);
             }
