@@ -53,6 +53,11 @@ public class H264Encoder {
     }
 
     public void encodeFrame(byte[] input) {
+        if(input == null){
+            Log.w(TAG, "Empty frame");
+            return;
+        }
+
         if (mediaCodec == null) {
             Log.e(TAG, "Encoder is not initialized");
             return;

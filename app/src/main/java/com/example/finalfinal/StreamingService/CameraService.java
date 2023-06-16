@@ -1,10 +1,12 @@
 package com.example.finalfinal.StreamingService;
 
+import android.app.Activity;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraControl;
+import androidx.camera.core.CameraInfo;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
@@ -30,13 +32,17 @@ public class CameraService {
     private ExecutorService cameraExecutor;
     private PreviewView previewView;
     private Context context;
+    LifecycleOwner cycle;
 
     private ImageAnalysis unencryptedImageAnalysis;
-    private byte[] currentFrame;
+    private byte[] frame;
+    private Camera camera;
 
-    public CameraService(PreviewView view, Context context){
+
+    public CameraService(PreviewView view, Activity activity){
         previewView = view;
-        this.context = context;
+        this.context = activity.getApplicationContext();
+        this.cycle = (LifecycleOwner)activity;
     }
 
     public void startCamera(){
@@ -88,7 +94,7 @@ public class CameraService {
         unencryptedImageAnalysis.setAnalyzer(cameraExecutor, unencryptedImageAnalyzer);
 
         try {
-            Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, preview, unencryptedImageAnalysis);
+            camera = cameraProvider.bindToLifecycle(cycle, cameraSelector, preview, unencryptedImageAnalysis);
             CameraControl cameraControl = camera.getCameraControl();
             // Additional camera control operations can be performed here if needed.
         } catch (Exception e) {
@@ -105,13 +111,15 @@ public class CameraService {
             byte[] data = new byte[buffer.capacity()];
             buffer.get(data);
 
-            currentFrame = data;
+            CameraInfo cameraInfo = camera.getCameraInfo();
+
+            frame = data;
 
             image.close();
         }
     };
 
-    public byte[] getCurrentFrame() {
-        return currentFrame;
+    public byte[] getFrame() {
+        return frame;
     }
 }

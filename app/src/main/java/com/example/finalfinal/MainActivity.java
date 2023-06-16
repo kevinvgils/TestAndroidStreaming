@@ -1,5 +1,6 @@
 package com.example.finalfinal;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
@@ -45,7 +46,9 @@ public class MainActivity extends AppCompatActivity {
     private RtmpSender sender;
     private H264Encoder encoder;
 
-    private Context context;
+    private Activity activity;
+
+    private LifecycleOwner cycle = this;
 
 
     @Override
@@ -53,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        context = this.getApplicationContext();
+        activity = this;
 
         // =====Initialize the start button=====
         startButton = findViewById(R.id.startButton);
@@ -63,8 +66,10 @@ public class MainActivity extends AppCompatActivity {
 
                 encoder = new H264Encoder();
                 encoder.startEncoder(100, 100, 30);
-                cam = new CameraService(findViewById(R.id.previewView), context);
+
+                cam = new CameraService(findViewById(R.id.previewView), activity);
                 cam.startCamera();
+
                 sender = new RtmpSender(cam);
                 sender.startMuxerConnection();
             }
