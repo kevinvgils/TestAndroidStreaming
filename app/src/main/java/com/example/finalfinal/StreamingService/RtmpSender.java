@@ -19,8 +19,9 @@ public class RtmpSender implements RtmpConnectionListener {
     H264Encoder encoder;
     String TAG = "RTMPSENDER";
 
-    public RtmpSender(CameraService cam) {
+    public RtmpSender(CameraService cam, H264Encoder encoder) {
         this.cam = cam;
+        this.encoder = encoder;
     }
 
     public void startMuxerConnection(){
@@ -84,7 +85,7 @@ public class RtmpSender implements RtmpConnectionListener {
 
             try{
                 encoder.encodeFrame(cam.getFrame());
-                Log.i(TAG, "onReadyToPublish: Full frame on iternation: "+i);
+
                 encoder.setH264EncodedDataListener(new H264EncodedDataListener() {
                     @Override
                     public void onH264EncodedData(byte[] data, boolean isHeader, boolean isKeyFrame, long timeStamp) {

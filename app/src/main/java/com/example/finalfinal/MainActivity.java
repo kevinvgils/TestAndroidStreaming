@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                 cam = new CameraService(findViewById(R.id.previewView), activity);
                 cam.startCamera();
 
-                sender = new RtmpSender(cam);
+                sender = new RtmpSender(cam, encoder);
                 sender.startMuxerConnection();
             }
         });
